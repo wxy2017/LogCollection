@@ -20,6 +20,8 @@ type DescParam struct {
 }
 
 func main() {
+	// bash 打包方式：CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o logCollection main.go
+
 	logConfig.Info("程序启动中...")
 	// 创建Gin引擎
 	gin.SetMode(gin.ReleaseMode)
