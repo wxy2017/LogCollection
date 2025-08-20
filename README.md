@@ -2,7 +2,7 @@
 
 ## 接口路径：http://[ip]:[port]/upload-logs
 ## 请求示例：
-  curl --location 'http://test.enbo12119.cn:6088/upload-logs' \
+  curl --location 'http://XXXX:6088/upload-logs' \
         --form 'file=@"/E:/Pictures/animal03.png"' \
         --form 'desc="{\"type\":\"all\",\"save_path\":\"/data/logs/\"}"'
 
