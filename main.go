@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
-	"logCollection/logConfig"
+	log "logCollection/logConfig"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -22,29 +23,20 @@ type DescParam struct {
 func main() {
 	// bash 打包方式：CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o logCollection main.go
 
-	logConfig.Info("程序启动中...")
+	log.Info("程序启动中...")
 	// 创建Gin引擎
 	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
-	r.Use(func(c *gin.Context) {
-		// 在请求完成后记录日志
-		start := time.Now() // 记录请求开始的时间
-		// 处理请求
-		c.Next()
-		// 计算耗时
-		latency := time.Since(start)
-		// 获取请求相关信息
-		clientIP := c.ClientIP()
-		method := c.Request.Method
-		path := c.Request.URL.Path
-		statusCode := c.Writer.Status()
-		logConfig.Info("%s %s %d %s %s", clientIP, method, statusCode, latency, path)
-	})
+	r := gin.New()
+	// 移除默认日志中间件
+	r.Use(gin.Recovery())
+	// 注册自定义日志中间件
+	r.Use(customGinLogger(strconv.Itoa(os.Getpid())))
 
 	// 设置文件上传路由
 	r.POST("/upload-logs", uploadLogsHandler)
 
 	// 启动服务器，默认监听8080端口
+	log.Info("服务器启动在 http://localhost:6088")
 	if err := r.Run(":6088"); err != nil {
 		panic(err)
 	}
@@ -157,7 +149,7 @@ func uploadLogsHandler(c *gin.Context) {
 
 		savedFiles = append(savedFiles, dst)
 	}
-
+	log.Info("日志收集成功：%s", logDir)
 	// 返回成功响应
 	c.JSON(http.StatusOK, gin.H{
 		"code":     200,
@@ -188,5 +180,35 @@ func getUniqueFilePath(dir, filename string) string {
 			return newPath
 		}
 		counter++
+	}
+}
+
+// customGinLogger 创建自定义日志中间件
+func customGinLogger(pid string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 记录开始时间
+		startTime := time.Now()
+		// 处理请求
+		c.Next()
+		// 计算耗时
+		latency := time.Since(startTime)
+		// 获取请求信息
+		statusCode := c.Writer.Status()
+		clientIP := c.ClientIP()
+		method := c.Request.Method
+		path := c.Request.URL.Path
+		// 格式化日志内容
+		logMsg := fmt.Sprintf("[%s]: [GIN] %s - %s | %d | %12s | %15s | %-6s \"%s\"",
+			pid,
+			startTime.Format("2006/01/02"),
+			startTime.Format("15:04:05"),
+			statusCode,
+			latency,
+			clientIP,
+			method,
+			path,
+		)
+		// 使用自定义的log.Info输出
+		log.Info(logMsg)
 	}
 }
