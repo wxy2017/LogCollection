@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"logCollection/log"
+	"logCollection/logConfig"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,7 +20,7 @@ type DescParam struct {
 }
 
 func main() {
-	log.Info("程序启动中...")
+	logConfig.Info("程序启动中...")
 	// 创建Gin引擎
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
@@ -36,7 +36,7 @@ func main() {
 		method := c.Request.Method
 		path := c.Request.URL.Path
 		statusCode := c.Writer.Status()
-		log.Info("%s %s %d %s %s", clientIP, method, statusCode, latency, path)
+		logConfig.Info("%s %s %d %s %s", clientIP, method, statusCode, latency, path)
 	})
 
 	// 设置文件上传路由

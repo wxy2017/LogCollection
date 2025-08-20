@@ -1,5 +1,5 @@
 package constant
 
 const (
-	LOG = "/LogCollection"
+	LOG = "./log"
 )

@@ -1,0 +1,14 @@
+Description=Accept Log Service
+After=network.target
+
+[Service]
+ExecStart=/opt/logCollection/logCollection
+WorkingDirectory=/opt/logCollection
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=logCollection
+
+[Install]
+WantedBy=multi-user.target
